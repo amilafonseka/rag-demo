@@ -43,7 +43,14 @@ public class RagService implements ApplicationRunner {
     // 2. RETRIEVE + 3. GENERATE
     public String ask(String question) {
         List<Document> matches = vectorStore.similaritySearch(
-                SearchRequest.builder().query(question).topK(4).build());
+                SearchRequest.builder().query(question).topK(4).similarityThreshold(0.45).build());
+
+        if (matches.isEmpty()) {
+            return "I don't know based on the provided documents";
+        }
+
+        matches.forEach(d -> System.out.println("score=" + d.getScore()
+        + "  text=" + d.getText().substring(0, Math.min(60, d.getText().length()))));
 
         String context = matches.stream()
                 .map(Document::getText)
